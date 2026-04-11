@@ -1,2 +1,3 @@
 -- no skid skid for you nigga!
+task.wait(2.5)
 loadstring(game:HttpGet("https://api.luarmor.net/files/v4/loaders/a8d52b33ec44614dfdcc07f1257e6530.lua"))()
