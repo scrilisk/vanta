@@ -9,8 +9,8 @@ __|/____(___(_/___/_(_ __(___(_____/________/_____(___ _/_/__/_/___(___(__/_/__/
                                                                                  
 ]]--
 local keySystem = loadstring(game:HttpGet("https://sdk.luaprot.net/key-ui.lua"))()
-keySystem.scriptId = ""
+keySystem.scriptId = "06047076469743628201"
 keySystem.keyURL = "https://luaprot.net/ad/db287eb9"
 keySystem.scriptName = "Vanta Premium"
-keySystem.validCallback = loadstring(game:HttpGet("https://luaprot.net/api/v2/loaders/get/06047076469743628201"))()
+keySystem.validCallback = nil
 keySystem:show()
