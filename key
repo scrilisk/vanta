@@ -13,6 +13,10 @@ return {
 		end
 
 		local currentKey = (type(lp_key) == "string" and lp_key) or (getgenv and type(getgenv) == "function" and getgenv().lp_key) or _G.lp_key
+		
+		if not currentKey and isfile and readfile and isfile("vanta_key.txt") then
+			pcall(function() currentKey = readfile("vanta_key.txt") end)
+		end
 		if currentKey and type(currentKey) == "string" then
 			self.sdk.scriptId = self.scriptId
 			local valid = self.sdk:checkKey(currentKey)
@@ -381,6 +385,9 @@ return {
 				
 				local valid = self.sdk:checkKey(key)
 				if valid.status == "VALID" then
+					if writefile then
+						pcall(function() writefile("vanta_key.txt", key) end)
+					end
 					invalid.Visible = false
 					valid.Visible = true
 					if valid.data and valid.data.discordUsername then
