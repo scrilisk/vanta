@@ -1,8 +1,70 @@
 local TweenService = game:GetService("TweenService")
 local CoreGui = game:GetService("CoreGui")
+local HttpService = game:GetService("HttpService")
 local LUAPROT_FONT = "rbxassetid://11702779409"
 
+local THEME_ACCENTS = {
+    [1] = { accent = Color3.fromRGB(100, 160, 255), hi = Color3.fromRGB(130, 180, 255) },
+    [2] = { accent = Color3.fromRGB(160, 100, 255), hi = Color3.fromRGB(180, 130, 255) },
+    [3] = { accent = Color3.fromRGB(52, 199, 120),  hi = Color3.fromRGB(80, 220, 150) },
+    [4] = { accent = Color3.fromRGB(255, 80, 80),   hi = Color3.fromRGB(255, 110, 110) },
+    [5] = { accent = Color3.fromRGB(220, 220, 220), hi = Color3.fromRGB(255, 255, 255) },
+}
+
+local function readLoaderPrefs()
+    local g = (getgenv and getgenv()) or _G
+    if type(shared) == "table" and type(shared.VantaPrefs) == "table" then
+        return shared.VantaPrefs
+    end
+    if type(g) == "table" and type(g.VantaPrefs) == "table" then
+        return g.VantaPrefs
+    end
+    if type(_G) == "table" and type(_G.VantaPrefs) == "table" then
+        return _G.VantaPrefs
+    end
+    if type(readfile) == "function" and type(isfile) == "function" and isfile("VantaConfig.json") then
+        local okRead, raw = pcall(readfile, "VantaConfig.json")
+        if okRead and type(raw) == "string" and raw ~= "" then
+            local okDec, decoded = pcall(HttpService.JSONDecode, HttpService, raw)
+            if okDec and type(decoded) == "table" then
+                return decoded
+            end
+        end
+    end
+    return {}
+end
+
+local function resolveAuthTheme()
+    local prefs = readLoaderPrefs()
+    local idx = tonumber(prefs.theme) or 1
+    if not THEME_ACCENTS[idx] then idx = 1 end
+    local accent = THEME_ACCENTS[idx].accent
+    local accentHi = THEME_ACCENTS[idx].hi
+    local isDark = prefs.darkMode ~= false
+
+    if isDark then
+        return {
+            accent = accent,
+            accentHi = accentHi,
+            card = Color3.fromRGB(20, 20, 20),
+            text = Color3.fromRGB(245, 248, 255),
+            sub = Color3.fromRGB(200, 214, 245),
+            track = Color3.fromRGB(40, 50, 70),
+        }
+    end
+
+    return {
+        accent = accent,
+        accentHi = accentHi,
+        card = Color3.fromRGB(242, 246, 252),
+        text = Color3.fromRGB(25, 34, 50),
+        sub = Color3.fromRGB(95, 110, 138),
+        track = Color3.fromRGB(215, 225, 240),
+    }
+end
+
 local function showAuthCard()
+    local theme = resolveAuthTheme()
     local host = (gethui and gethui()) or CoreGui
     local old = host:FindFirstChild("VantaAuthCard")
     if old then old:Destroy() end
@@ -19,7 +81,7 @@ local function showAuthCard()
     card.AnchorPoint = Vector2.new(0.5, 0.5)
     card.Position = UDim2.fromScale(0.5, 0.5) + UDim2.fromOffset(0, 8)
     card.Size = UDim2.fromOffset(360, 120)
-    card.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+    card.BackgroundColor3 = theme.card
     card.BackgroundTransparency = 1
     card.BorderSizePixel = 0
     card.ClipsDescendants = true
@@ -40,7 +102,7 @@ local function showAuthCard()
     local e1 = Instance.new("ImageLabel")
     e1.BackgroundTransparency = 1
     e1.Image = "rbxassetid://118261594552972"
-    e1.ImageColor3 = Color3.fromRGB(44, 84, 250)
+    e1.ImageColor3 = theme.accent
     e1.Size = UDim2.fromScale(1.2, 1.2)
     e1.Position = UDim2.fromScale(-0.05, -0.1)
     e1.ImageTransparency = 1
@@ -49,7 +111,7 @@ local function showAuthCard()
     local e2 = Instance.new("ImageLabel")
     e2.BackgroundTransparency = 1
     e2.Image = "rbxassetid://96081323989846"
-    e2.ImageColor3 = Color3.fromRGB(45, 85, 251)
+    e2.ImageColor3 = theme.accentHi
     e2.Size = UDim2.fromScale(1.2, 1.2)
     e2.Position = UDim2.fromScale(-0.15, -0.2)
     e2.ImageTransparency = 1
@@ -79,7 +141,7 @@ local function showAuthCard()
     title.Size = UDim2.new(1, -12, 0, 24)
     title.FontFace = Font.new(LUAPROT_FONT, Enum.FontWeight.Bold, Enum.FontStyle.Italic)
     title.Text = "Authenticating"
-    title.TextColor3 = Color3.fromRGB(245, 248, 255)
+    title.TextColor3 = theme.text
     title.TextXAlignment = Enum.TextXAlignment.Left
     title.TextSize = 17
     title.TextTransparency = 1
@@ -91,7 +153,7 @@ local function showAuthCard()
     status.Size = UDim2.new(1, -12, 0, 18)
     status.FontFace = Font.new(LUAPROT_FONT, Enum.FontWeight.Light, Enum.FontStyle.Normal)
     status.Text = "Validating key..."
-    status.TextColor3 = Color3.fromRGB(200, 214, 245)
+    status.TextColor3 = theme.sub
     status.TextXAlignment = Enum.TextXAlignment.Left
     status.TextSize = 12
     status.TextTransparency = 1
@@ -100,7 +162,7 @@ local function showAuthCard()
     local barBg = Instance.new("Frame")
     barBg.Position = UDim2.fromOffset(0, 78)
     barBg.Size = UDim2.new(1, -16, 0, 7)
-    barBg.BackgroundColor3 = Color3.fromRGB(40, 50, 70)
+    barBg.BackgroundColor3 = theme.track
     barBg.BackgroundTransparency = 1
     barBg.BorderSizePixel = 0
     barBg.Parent = right
@@ -108,7 +170,7 @@ local function showAuthCard()
 
     local bar = Instance.new("Frame")
     bar.Size = UDim2.fromScale(0, 1)
-    bar.BackgroundColor3 = Color3.fromRGB(44, 84, 250)
+    bar.BackgroundColor3 = theme.accent
     bar.BackgroundTransparency = 1
     bar.BorderSizePixel = 0
     bar.Parent = barBg
