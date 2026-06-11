@@ -1,0 +1,262 @@
+local Players = game:GetService("Players")
+local TweenService = game:GetService("TweenService")
+local RunService = game:GetService("RunService")
+local CoreGui = game:GetService("CoreGui")
+local HttpService = game:GetService("HttpService")
+
+local player = Players.LocalPlayer
+if not player then return end
+
+local g = (getgenv and getgenv()) or _G
+local state = nil
+if type(shared) == "table" and type(shared.VantaLoadState) == "table" then
+    state = shared.VantaLoadState
+elseif type(g) == "table" and type(g.VantaLoadState) == "table" then
+    state = g.VantaLoadState
+elseif type(_G) == "table" and type(_G.VantaLoadState) == "table" then
+    state = _G.VantaLoadState
+else
+    state = { loaded = false, startedAt = os.clock() }
+end
+if type(g) == "table" then g.VantaLoadState = state end
+if type(shared) == "table" then shared.VantaLoadState = state end
+_G.VantaLoadState = state
+
+local THEMES = {
+    { accent = Color3.fromRGB(100, 160, 255), hi = Color3.fromRGB(130, 180, 255) },
+    { accent = Color3.fromRGB(160, 100, 255), hi = Color3.fromRGB(180, 130, 255) }, 
+    { accent = Color3.fromRGB(52, 199, 120),  hi = Color3.fromRGB(80, 220, 150)  }, 
+    { accent = Color3.fromRGB(255, 80, 80),   hi = Color3.fromRGB(255, 110, 110) }, 
+    { accent = Color3.fromRGB(220, 220, 220), hi = Color3.fromRGB(255, 255, 255) }, 
+}
+
+local function readPrefsFromFile()
+    if type(readfile) ~= "function" or type(isfile) ~= "function" then return nil end
+    if not isfile("VantaConfig.json") then return nil end
+    local okRead, raw = pcall(readfile, "VantaConfig.json")
+    if not okRead or type(raw) ~= "string" or raw == "" then return nil end
+    local okDec, decoded = pcall(HttpService.JSONDecode, HttpService, raw)
+    if okDec and type(decoded) == "table" then
+        return decoded
+    end
+    return nil
+end
+
+local function resolveLoaderPrefs()
+    if type(shared) == "table" and type(shared.VantaPrefs) == "table" then
+        return shared.VantaPrefs
+    end
+    if type(g) == "table" and type(g.VantaPrefs) == "table" then
+        return g.VantaPrefs
+    end
+    if type(_G) == "table" and type(_G.VantaPrefs) == "table" then
+        return _G.VantaPrefs
+    end
+    return readPrefsFromFile() or {}
+end
+
+local loaderPrefs = resolveLoaderPrefs()
+local themeIndex = tonumber(loaderPrefs.theme) or 1
+if not THEMES[themeIndex] then themeIndex = 1 end
+local isDark = loaderPrefs.darkMode ~= false
+local accent = THEMES[themeIndex].accent
+local accentHi = THEMES[themeIndex].hi
+local bgCard = isDark and Color3.fromRGB(17, 24, 38) or Color3.fromRGB(244, 247, 252)
+local bgWrap = isDark and Color3.fromRGB(31, 47, 74) or Color3.fromRGB(230, 236, 248)
+local strokeColor = accentHi
+local titleColor = isDark and Color3.fromRGB(240, 245, 255) or Color3.fromRGB(26, 35, 52)
+local subColor = isDark and Color3.fromRGB(176, 192, 225) or Color3.fromRGB(82, 96, 128)
+local dotColor = accent
+local iconColor = isDark and Color3.fromRGB(230, 238, 255) or Color3.fromRGB(50, 67, 102)
+local gradA = isDark and accent:lerp(Color3.fromRGB(18, 24, 36), 0.72) or Color3.fromRGB(255, 255, 255)
+local gradB = isDark and Color3.fromRGB(16, 20, 30) or accent:lerp(Color3.fromRGB(240, 245, 255), 0.85)
+
+local function getHostGui()
+    local ok, pg = pcall(function()
+        return player:FindFirstChildOfClass("PlayerGui")
+    end)
+    if ok and pg then
+        return pg
+    end
+    return CoreGui
+end
+
+local existing = CoreGui:FindFirstChild("VantaAuthenthicatingCard")
+if not existing then
+    local pg = player:FindFirstChildOfClass("PlayerGui")
+    if pg then
+        existing = pg:FindFirstChild("VantaAuthenthicatingCard")
+    end
+end
+if existing then
+    existing:Destroy()
+end
+
+local screen = Instance.new("ScreenGui")
+screen.Name = "VantaAuthenthicatingCard"
+screen.ResetOnSpawn = false
+screen.IgnoreGuiInset = true
+screen.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+screen.DisplayOrder = 10020
+screen.Parent = getHostGui()
+
+local holder = Instance.new("Frame")
+holder.Name = "Holder"
+holder.AnchorPoint = Vector2.new(0.5, 0.5)
+holder.Position = UDim2.fromScale(0.5, 0.5)
+holder.Size = UDim2.fromOffset(392, 122)
+holder.BackgroundColor3 = bgCard
+holder.BackgroundTransparency = 0.08
+holder.BorderSizePixel = 0
+holder.Parent = screen
+
+local corner = Instance.new("UICorner")
+corner.CornerRadius = UDim.new(0, 16)
+corner.Parent = holder
+
+local stroke = Instance.new("UIStroke")
+stroke.Color = strokeColor
+stroke.Thickness = 1.2
+stroke.Transparency = 0.2
+stroke.Parent = holder
+
+local grad = Instance.new("UIGradient")
+grad.Color = ColorSequence.new({
+    ColorSequenceKeypoint.new(0, gradA),
+    ColorSequenceKeypoint.new(1, gradB),
+})
+grad.Rotation = 22
+grad.Parent = holder
+
+local glow = Instance.new("ImageLabel")
+glow.Name = "Glow"
+glow.AnchorPoint = Vector2.new(0.5, 0.5)
+glow.Position = UDim2.fromScale(0.5, 0.5)
+glow.Size = UDim2.fromOffset(450, 180)
+glow.BackgroundTransparency = 1
+glow.Image = "rbxassetid://5028857084"
+glow.ImageColor3 = accent
+glow.ImageTransparency = 0.76
+glow.ZIndex = 0
+glow.Parent = holder
+
+local iconWrap = Instance.new("Frame")
+iconWrap.Name = "IconWrap"
+iconWrap.Position = UDim2.fromOffset(18, 19)
+iconWrap.Size = UDim2.fromOffset(84, 84)
+iconWrap.BackgroundColor3 = bgWrap
+iconWrap.BackgroundTransparency = 0.14
+iconWrap.BorderSizePixel = 0
+iconWrap.Parent = holder
+
+local iconCorner = Instance.new("UICorner")
+iconCorner.CornerRadius = UDim.new(0, 14)
+iconCorner.Parent = iconWrap
+
+local iconStroke = Instance.new("UIStroke")
+iconStroke.Color = accentHi
+iconStroke.Thickness = 1
+iconStroke.Transparency = 0.18
+iconStroke.Parent = iconWrap
+
+local icon = Instance.new("ImageLabel")
+icon.Name = "Logo"
+icon.AnchorPoint = Vector2.new(0.5, 0.5)
+icon.Position = UDim2.fromScale(0.5, 0.5)
+icon.Size = UDim2.fromOffset(52, 52)
+icon.BackgroundTransparency = 1
+icon.Image = "rbxassetid://78968317665673"
+icon.ImageColor3 = iconColor
+icon.Parent = iconWrap
+
+local title = Instance.new("TextLabel")
+title.BackgroundTransparency = 1
+title.Position = UDim2.fromOffset(116, 26)
+title.Size = UDim2.new(1, -130, 0, 30)
+title.Font = Enum.Font.GothamBold
+title.Text = "Authenthicating"
+title.TextSize = 23
+title.TextXAlignment = Enum.TextXAlignment.Left
+title.TextColor3 = titleColor
+title.Parent = holder
+
+local sub = Instance.new("TextLabel")
+sub.BackgroundTransparency = 1
+sub.Position = UDim2.fromOffset(116, 60)
+sub.Size = UDim2.new(1, -130, 0, 20)
+sub.Font = Enum.Font.Gotham
+sub.Text = "Securing session and loading modules..."
+sub.TextSize = 13
+sub.TextXAlignment = Enum.TextXAlignment.Left
+sub.TextColor3 = subColor
+sub.Parent = holder
+
+local dots = Instance.new("TextLabel")
+dots.BackgroundTransparency = 1
+dots.Position = UDim2.fromOffset(116, 80)
+dots.Size = UDim2.new(1, -130, 0, 20)
+dots.Font = Enum.Font.GothamMedium
+dots.Text = "."
+dots.TextSize = 16
+dots.TextXAlignment = Enum.TextXAlignment.Left
+dots.TextColor3 = dotColor
+dots.Parent = holder
+
+holder.Size = UDim2.fromOffset(332, 104)
+holder.BackgroundTransparency = 1
+title.TextTransparency = 1
+sub.TextTransparency = 1
+dots.TextTransparency = 1
+icon.ImageTransparency = 1
+iconWrap.BackgroundTransparency = 1
+
+TweenService:Create(holder, TweenInfo.new(0.28, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
+    Size = UDim2.fromOffset(392, 122),
+    BackgroundTransparency = 0.08,
+}):Play()
+TweenService:Create(title, TweenInfo.new(0.24), { TextTransparency = 0 }):Play()
+TweenService:Create(sub, TweenInfo.new(0.24), { TextTransparency = 0 }):Play()
+TweenService:Create(dots, TweenInfo.new(0.24), { TextTransparency = 0 }):Play()
+TweenService:Create(icon, TweenInfo.new(0.24), { ImageTransparency = 0 }):Play()
+TweenService:Create(iconWrap, TweenInfo.new(0.24), { BackgroundTransparency = 0.14 }):Play()
+
+local alive = true
+task.spawn(function()
+    local seq = {".", "..", "..."}
+    local idx = 1
+    while alive do
+        dots.Text = seq[idx]
+        idx = (idx % #seq) + 1
+        task.wait(0.35)
+    end
+end)
+
+local rotConn = RunService.RenderStepped:Connect(function(dt)
+    grad.Rotation = (grad.Rotation + dt * 16) % 360
+end)
+
+local startedAt = os.clock()
+local maxWait = 35
+while not state.loaded and (os.clock() - startedAt) < maxWait do
+    task.wait(0.08)
+end
+
+alive = false
+if rotConn then
+    rotConn:Disconnect()
+end
+
+local tweenOut = TweenService:Create(holder, TweenInfo.new(0.22, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {
+    BackgroundTransparency = 1,
+    Size = UDim2.fromOffset(352, 104),
+})
+TweenService:Create(title, TweenInfo.new(0.18), { TextTransparency = 1 }):Play()
+TweenService:Create(sub, TweenInfo.new(0.18), { TextTransparency = 1 }):Play()
+TweenService:Create(dots, TweenInfo.new(0.18), { TextTransparency = 1 }):Play()
+TweenService:Create(icon, TweenInfo.new(0.18), { ImageTransparency = 1 }):Play()
+tweenOut:Play()
+pcall(function() tweenOut.Completed:Wait() end)
+
+if screen and screen.Parent then
+    screen:Destroy()
+end
