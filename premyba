@@ -1,6 +1,184 @@
+local TweenService = game:GetService("TweenService")
+local CoreGui = game:GetService("CoreGui")
+
+local function showAuthCard()
+    local host = (gethui and gethui()) or CoreGui
+    local old = host:FindFirstChild("VantaAuthCard")
+    if old then old:Destroy() end
+
+    local gui = Instance.new("ScreenGui")
+    gui.Name = "VantaAuthCard"
+    gui.IgnoreGuiInset = true
+    gui.ResetOnSpawn = false
+    gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+    gui.DisplayOrder = 10050
+    gui.Parent = host
+
+    local card = Instance.new("Frame")
+    card.AnchorPoint = Vector2.new(0.5, 0.5)
+    card.Position = UDim2.fromScale(0.5, 0.5) + UDim2.fromOffset(0, 8)
+    card.Size = UDim2.fromOffset(360, 120)
+    card.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+    card.BackgroundTransparency = 1
+    card.BorderSizePixel = 0
+    card.ClipsDescendants = true
+    card.Parent = gui
+    Instance.new("UICorner", card).CornerRadius = UDim.new(0, 10)
+
+    local left = Instance.new("Frame")
+    left.Size = UDim2.fromScale(0.38, 1)
+    left.BackgroundTransparency = 1
+    left.Parent = card
+
+    local bg = Instance.new("Frame")
+    bg.Size = UDim2.fromScale(1, 1)
+    bg.BackgroundTransparency = 1
+    bg.ClipsDescendants = true
+    bg.Parent = left
+
+    local e1 = Instance.new("ImageLabel")
+    e1.BackgroundTransparency = 1
+    e1.Image = "rbxassetid://118261594552972"
+    e1.ImageColor3 = Color3.fromRGB(44, 84, 250)
+    e1.Size = UDim2.fromScale(1.2, 1.2)
+    e1.Position = UDim2.fromScale(-0.05, -0.1)
+    e1.ImageTransparency = 1
+    e1.Parent = bg
+
+    local e2 = Instance.new("ImageLabel")
+    e2.BackgroundTransparency = 1
+    e2.Image = "rbxassetid://96081323989846"
+    e2.ImageColor3 = Color3.fromRGB(45, 85, 251)
+    e2.Size = UDim2.fromScale(1.2, 1.2)
+    e2.Position = UDim2.fromScale(-0.15, -0.2)
+    e2.ImageTransparency = 1
+    e2.Parent = bg
+
+    local lp = Instance.new("TextLabel")
+    lp.BackgroundTransparency = 1
+    lp.Position = UDim2.fromOffset(14, 14)
+    lp.Size = UDim2.new(1, -20, 0, 28)
+    lp.Font = Enum.Font.GothamBold
+    lp.Text = "LuaProt."
+    lp.TextColor3 = Color3.new(1, 1, 1)
+    lp.TextXAlignment = Enum.TextXAlignment.Left
+    lp.TextSize = 20
+    lp.TextTransparency = 1
+    lp.Parent = left
+
+    local right = Instance.new("Frame")
+    right.Position = UDim2.fromScale(0.41, 0)
+    right.Size = UDim2.fromScale(0.59, 1)
+    right.BackgroundTransparency = 1
+    right.Parent = card
+
+    local title = Instance.new("TextLabel")
+    title.BackgroundTransparency = 1
+    title.Position = UDim2.fromOffset(0, 20)
+    title.Size = UDim2.new(1, -12, 0, 24)
+    title.Font = Enum.Font.GothamBold
+    title.Text = "Authenticating"
+    title.TextColor3 = Color3.fromRGB(245, 248, 255)
+    title.TextXAlignment = Enum.TextXAlignment.Left
+    title.TextSize = 18
+    title.TextTransparency = 1
+    title.Parent = right
+
+    local status = Instance.new("TextLabel")
+    status.BackgroundTransparency = 1
+    status.Position = UDim2.fromOffset(0, 46)
+    status.Size = UDim2.new(1, -12, 0, 18)
+    status.Font = Enum.Font.Gotham
+    status.Text = "Validating key..."
+    status.TextColor3 = Color3.fromRGB(200, 214, 245)
+    status.TextXAlignment = Enum.TextXAlignment.Left
+    status.TextSize = 12
+    status.TextTransparency = 1
+    status.Parent = right
+
+    local barBg = Instance.new("Frame")
+    barBg.Position = UDim2.fromOffset(0, 78)
+    barBg.Size = UDim2.new(1, -16, 0, 7)
+    barBg.BackgroundColor3 = Color3.fromRGB(40, 50, 70)
+    barBg.BackgroundTransparency = 1
+    barBg.BorderSizePixel = 0
+    barBg.Parent = right
+    Instance.new("UICorner", barBg).CornerRadius = UDim.new(1, 0)
+
+    local bar = Instance.new("Frame")
+    bar.Size = UDim2.fromScale(0, 1)
+    bar.BackgroundColor3 = Color3.fromRGB(44, 84, 250)
+    bar.BackgroundTransparency = 1
+    bar.BorderSizePixel = 0
+    bar.Parent = barBg
+    Instance.new("UICorner", bar).CornerRadius = UDim.new(1, 0)
+
+    local function tw(obj, t, props, dir)
+        return TweenService:Create(
+            obj,
+            TweenInfo.new(t, Enum.EasingStyle.Quad, dir or Enum.EasingDirection.Out),
+            props
+        )
+    end
+
+    tw(card, 0.22, {BackgroundTransparency = 0.02, Position = UDim2.fromScale(0.5, 0.5)}):Play()
+    tw(e1, 0.25, {ImageTransparency = 0.15}):Play()
+    tw(e2, 0.25, {ImageTransparency = 0.25}):Play()
+    tw(lp, 0.22, {TextTransparency = 0}):Play()
+    tw(title, 0.22, {TextTransparency = 0}):Play()
+    tw(status, 0.22, {TextTransparency = 0}):Play()
+    tw(barBg, 0.22, {BackgroundTransparency = 0.1}):Play()
+    tw(bar, 0.28, {BackgroundTransparency = 0, Size = UDim2.fromScale(0.55, 1)}):Play()
+
+    local api = {}
+
+    function api:setText(text)
+        if text then status.Text = text end
+    end
+
+    function api:done(success, text)
+        if text then status.Text = text end
+        bar.BackgroundColor3 = success and Color3.fromRGB(79, 255, 70) or Color3.fromRGB(255, 53, 53)
+        tw(bar, 0.18, {Size = UDim2.fromScale(1, 1)}):Play()
+        task.wait(0.22)
+
+        tw(card, 0.2, {BackgroundTransparency = 1, Position = UDim2.fromScale(0.5, 0.5) + UDim2.fromOffset(0, 8)}, Enum.EasingDirection.In):Play()
+        tw(e1, 0.2, {ImageTransparency = 1}, Enum.EasingDirection.In):Play()
+        tw(e2, 0.2, {ImageTransparency = 1}, Enum.EasingDirection.In):Play()
+        tw(lp, 0.2, {TextTransparency = 1}, Enum.EasingDirection.In):Play()
+        tw(title, 0.2, {TextTransparency = 1}, Enum.EasingDirection.In):Play()
+        tw(status, 0.2, {TextTransparency = 1}, Enum.EasingDirection.In):Play()
+        tw(barBg, 0.2, {BackgroundTransparency = 1}, Enum.EasingDirection.In):Play()
+        tw(bar, 0.2, {BackgroundTransparency = 1}, Enum.EasingDirection.In):Play()
+
+        task.wait(0.22)
+        if gui and gui.Parent then gui:Destroy() end
+    end
+
+    return api
+end
+
 local keySystem = loadstring(game:HttpGet("https://raw.githubusercontent.com/scrilisk/vanta/refs/heads/main/key"))()
 keySystem.scriptId = "06047076469743628201"
 keySystem.keyURL = "https://luaprot.net/ad/db287eb9"
 keySystem.scriptName = "Vanta Premium"
-keySystem.validCallback = nil
+
+keySystem.validCallback = function()
+    local card = showAuthCard()
+    card:setText("Key accepted. Loading script...")
+    task.wait(0.05)
+
+    keySystem.sdk.scriptId = keySystem.scriptId
+    local ok, err = pcall(function()
+        keySystem.sdk:loadScript()
+    end)
+
+    if ok then
+        card:done(true, "Authenticated.")
+    else
+        warn("[vanta] load error:", err)
+        card:done(false, "Load failed.")
+    end
+end
+
 keySystem:show()
