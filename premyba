@@ -1,45 +1,6 @@
-local function startLoadState()
-    local G = (getgenv and getgenv()) or _G
-    G.VantaLoadState = {
-        loaded = false,
-        startedAt = os.clock(),
-        finishedAt = nil
-    }
-    if type(shared) == "table" then shared.VantaLoadState = G.VantaLoadState end
-    _G.VantaLoadState = G.VantaLoadState
-    return G.VantaLoadState
-end
-
-local function finishLoadState(state)
-    state.loaded = true
-    state.finishedAt = os.clock()
-    if type(shared) == "table" then shared.VantaLoadState = state end
-    _G.VantaLoadState = state
-end
-
 local keySystem = loadstring(game:HttpGet("https://raw.githubusercontent.com/scrilisk/vanta/refs/heads/main/key"))()
 keySystem.scriptId = "06047076469743628201"
 keySystem.keyURL = "https://luaprot.net/ad/db287eb9"
 keySystem.scriptName = "Vanta Premium"
-
-keySystem.validCallback = function()
-    local state = startLoadState()
-
-    task.spawn(function()
-        pcall(function()
-            loadstring(game:HttpGet("https://raw.githubusercontent.com/scrilisk/vanta/refs/heads/main/vanta_auth_card"))()
-        end)
-    end)
-
-    local ok, err = pcall(function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/scrilisk/vanta/refs/heads/main/premyba"))()
-    end)
-
-    finishLoadState(state)
-
-    if not ok then
-        warn("[vanta] load failed:", err)
-    end
-end
-
+keySystem.validCallback = nil
 keySystem:show()
