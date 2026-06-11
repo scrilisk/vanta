@@ -1,5 +1,6 @@
 local TweenService = game:GetService("TweenService")
 local CoreGui = game:GetService("CoreGui")
+local LUAPROT_FONT = "rbxassetid://11702779409"
 
 local function showAuthCard()
     local host = (gethui and gethui()) or CoreGui
@@ -58,7 +59,7 @@ local function showAuthCard()
     lp.BackgroundTransparency = 1
     lp.Position = UDim2.fromOffset(14, 14)
     lp.Size = UDim2.new(1, -20, 0, 28)
-    lp.Font = Enum.Font.GothamBold
+    lp.FontFace = Font.new(LUAPROT_FONT, Enum.FontWeight.Bold, Enum.FontStyle.Italic)
     lp.Text = "LuaProt."
     lp.TextColor3 = Color3.new(1, 1, 1)
     lp.TextXAlignment = Enum.TextXAlignment.Left
@@ -76,11 +77,11 @@ local function showAuthCard()
     title.BackgroundTransparency = 1
     title.Position = UDim2.fromOffset(0, 20)
     title.Size = UDim2.new(1, -12, 0, 24)
-    title.Font = Enum.Font.GothamBold
+    title.FontFace = Font.new(LUAPROT_FONT, Enum.FontWeight.Bold, Enum.FontStyle.Italic)
     title.Text = "Authenticating"
     title.TextColor3 = Color3.fromRGB(245, 248, 255)
     title.TextXAlignment = Enum.TextXAlignment.Left
-    title.TextSize = 18
+    title.TextSize = 17
     title.TextTransparency = 1
     title.Parent = right
 
@@ -88,7 +89,7 @@ local function showAuthCard()
     status.BackgroundTransparency = 1
     status.Position = UDim2.fromOffset(0, 46)
     status.Size = UDim2.new(1, -12, 0, 18)
-    status.Font = Enum.Font.Gotham
+    status.FontFace = Font.new(LUAPROT_FONT, Enum.FontWeight.Light, Enum.FontStyle.Normal)
     status.Text = "Validating key..."
     status.TextColor3 = Color3.fromRGB(200, 214, 245)
     status.TextXAlignment = Enum.TextXAlignment.Left
@@ -158,7 +159,7 @@ local function showAuthCard()
     return api
 end
 
-local keySystem = loadstring(game:HttpGet("https://raw.githubusercontent.com/scrilisk/vanta/refs/heads/main/key"))()
+local keySystem = loadstring(game:HttpGet("https://pastefy.app/HKC2Dhy1/raw"))()
 keySystem.scriptId = "06047076469743628201"
 keySystem.keyURL = "https://luaprot.net/ad/db287eb9"
 keySystem.scriptName = "Vanta Premium"
@@ -181,4 +182,4 @@ keySystem.validCallback = function()
     end
 end
 
-keySystem:show()
+keySystem:show() 
