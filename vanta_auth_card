@@ -23,11 +23,11 @@ if type(shared) == "table" then shared.VantaLoadState = state end
 _G.VantaLoadState = state
 
 local THEMES = {
-    { accent = Color3.fromRGB(100, 160, 255), hi = Color3.fromRGB(130, 180, 255) },
-    { accent = Color3.fromRGB(160, 100, 255), hi = Color3.fromRGB(180, 130, 255) }, 
-    { accent = Color3.fromRGB(52, 199, 120),  hi = Color3.fromRGB(80, 220, 150)  }, 
-    { accent = Color3.fromRGB(255, 80, 80),   hi = Color3.fromRGB(255, 110, 110) }, 
-    { accent = Color3.fromRGB(220, 220, 220), hi = Color3.fromRGB(255, 255, 255) }, 
+    { accent = Color3.fromRGB(100, 160, 255), hi = Color3.fromRGB(130, 180, 255) }, -- Blue
+    { accent = Color3.fromRGB(160, 100, 255), hi = Color3.fromRGB(180, 130, 255) }, -- Purple
+    { accent = Color3.fromRGB(52, 199, 120),  hi = Color3.fromRGB(80, 220, 150)  }, -- Green
+    { accent = Color3.fromRGB(255, 80, 80),   hi = Color3.fromRGB(255, 110, 110) }, -- Red
+    { accent = Color3.fromRGB(220, 220, 220), hi = Color3.fromRGB(255, 255, 255) }, -- White
 }
 
 local function readPrefsFromFile()
@@ -88,8 +88,14 @@ if not existing then
         existing = pg:FindFirstChild("VantaAuthenthicatingCard")
     end
 end
-if existing then
-    existing:Destroy()
+if state.loaded then
+    if existing then
+        existing:Destroy()
+    end
+    return
+end
+if existing or state.authCardActive then
+    return
 end
 
 local screen = Instance.new("ScreenGui")
@@ -99,6 +105,7 @@ screen.IgnoreGuiInset = true
 screen.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 screen.DisplayOrder = 10020
 screen.Parent = getHostGui()
+state.authCardActive = true
 
 local holder = Instance.new("Frame")
 holder.Name = "Holder"
@@ -235,28 +242,31 @@ local rotConn = RunService.RenderStepped:Connect(function(dt)
     grad.Rotation = (grad.Rotation + dt * 16) % 360
 end)
 
-local startedAt = os.clock()
-local maxWait = 35
-while not state.loaded and (os.clock() - startedAt) < maxWait do
-    task.wait(0.08)
-end
+task.spawn(function()
+    local startedAt = os.clock()
+    local maxWait = 35
+    while not state.loaded and (os.clock() - startedAt) < maxWait do
+        task.wait(0.08)
+    end
 
-alive = false
-if rotConn then
-    rotConn:Disconnect()
-end
+    alive = false
+    if rotConn then
+        rotConn:Disconnect()
+    end
 
-local tweenOut = TweenService:Create(holder, TweenInfo.new(0.22, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {
-    BackgroundTransparency = 1,
-    Size = UDim2.fromOffset(352, 104),
-})
-TweenService:Create(title, TweenInfo.new(0.18), { TextTransparency = 1 }):Play()
-TweenService:Create(sub, TweenInfo.new(0.18), { TextTransparency = 1 }):Play()
-TweenService:Create(dots, TweenInfo.new(0.18), { TextTransparency = 1 }):Play()
-TweenService:Create(icon, TweenInfo.new(0.18), { ImageTransparency = 1 }):Play()
-tweenOut:Play()
-pcall(function() tweenOut.Completed:Wait() end)
+    local tweenOut = TweenService:Create(holder, TweenInfo.new(0.22, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {
+        BackgroundTransparency = 1,
+        Size = UDim2.fromOffset(352, 104),
+    })
+    TweenService:Create(title, TweenInfo.new(0.18), { TextTransparency = 1 }):Play()
+    TweenService:Create(sub, TweenInfo.new(0.18), { TextTransparency = 1 }):Play()
+    TweenService:Create(dots, TweenInfo.new(0.18), { TextTransparency = 1 }):Play()
+    TweenService:Create(icon, TweenInfo.new(0.18), { ImageTransparency = 1 }):Play()
+    tweenOut:Play()
+    pcall(function() tweenOut.Completed:Wait() end)
 
-if screen and screen.Parent then
-    screen:Destroy()
-end
+    if screen and screen.Parent then
+        screen:Destroy()
+    end
+    state.authCardActive = false
+end)
